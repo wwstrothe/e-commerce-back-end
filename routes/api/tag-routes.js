@@ -50,40 +50,36 @@ router.post('/', async (req, res) => {
   // create a new tag    
     try {
     const newTag = await Tag.create(req.body)
-    res.status(201).json(newTag)
+    res.status(200).json(newTag)
   }
   catch (err) {
     res.status(500).json(err)
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put("/:id", (req, res) => {
   // update a tag's name by its `id` value
-      try {
-    const updateTag = await Tag.update(req.body, {
+  Tag.update(
+    {
+      tag_name: req.body.tag_name,
+    },
+    {
       where: {
-        id: req.params.id
-      }
-    })
-    if (updateTag[0] === 0) {
-      throw {
-        status: 404,
-        message: 'No Tag was found with that ID'
-      }
+        id: req.params.id,
+      },
     }
-    console.log('Updated Tag', updateTag)
-    res.status(201).json({
-      message: "Tag has been updated!",
-      data: updateCategory
+  )
+    .then(tagData => {
+      if (!tagData) {
+        res.status(404).json({ message: "No Tag found with that ID." });
+        return;
+      }
+      res.json(tagData);
     })
-  }
-  catch (err) {
-    if (err.status === 404) {
-      res.status(404).json(err)
-    } else {
-      res.status(500).json(err)
-    }
-  }
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.delete('/:id', async (req, res) => {
